@@ -6,6 +6,7 @@ target_phrases = ['what']
 ppdb_filename = "tldr_ppdb"
 pp_dict = {}
 
+
 def phrase_scrape(target_phrases, ppdb_filename):
     ppdb  = open(ppdb_filename, 'r')
     lines = ppdb.readlines()
@@ -13,6 +14,9 @@ def phrase_scrape(target_phrases, ppdb_filename):
     for phrase in target_phrases:
         pp_dict[phrase] = {}
         for line in lines:
+            # discard lines with unrecoverable encoding errors
+            if '\\ x' in line or 'xc3' in line:
+                continue
             split = line.split(sep = ' ||| ')
             if(split[1] == phrase):
                 paraphrase = split[2]
