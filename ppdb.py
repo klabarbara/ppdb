@@ -1,4 +1,5 @@
-
+import re
+import json
 
 ppdb_dict = None
 
@@ -40,4 +41,3 @@ class PPDB(object):
             data = json.load(f)
             for key in dict:
                 data['text'] = re.sub(key, dict[key], data['text'])
-                
