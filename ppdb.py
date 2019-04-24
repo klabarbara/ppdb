@@ -36,8 +36,11 @@ class PPDB(object):
             self.ppdb_dict[phrase][paraphrase][count + 1] = split[5] #entailment
         ppdb.close()
 
-    def json_swap(self,filename,dict={'what exactly': 'what'}):
+    def json_swap(self,filename,dict={'most common': 'common'}):
         with open(filename, 'r') as f:
             data = json.load(f)
+            questions = data['questions']
             for key in dict:
-                data['text'] = re.sub(key, dict[key], data['text'])
+                for question in questions:
+                    data[question]['text'] = re.sub(key, dict[key], data[question]['text'])
+
