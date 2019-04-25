@@ -4,13 +4,13 @@ import json
 ppdb_dict = None
 
 class PPDB(object):
-    
+
     def __init__(self):
         # each key in self is a token, and each value is a tuple (set, dict).
         super(PPDB, self).__init__()
 
         self.ppdb_dict = {}
-    
+
     def load_ppdb(self,path):
         ppdb  = open(path, 'r')
         lines = ppdb.readlines()
@@ -36,11 +36,12 @@ class PPDB(object):
             self.ppdb_dict[phrase][paraphrase][count + 1] = split[5] #entailment
         ppdb.close()
 
-    def json_swap(self,filename,dict={'most common': 'common'}):
+    def json_swap(self,filename,d={'most common': 'common'}):
         with open(filename, 'r') as f:
             data = json.load(f)
             questions = data['questions']
-            for key in dict:
+            for key in d:
                 for question in questions:
-                    data[question]['text'] = re.sub(key, dict[key], data[question]['text'])
-
+                    question['text'] = re.sub(key, d[key], question['text'])
+                data['questions'] = questions
+        return data
