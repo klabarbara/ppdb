@@ -59,3 +59,13 @@ class PPDB(object):
                     question['text'] = re.sub(key, d[key], question['text'])
                 data['questions'] = questions
         return data
+
+    def json_appender(self,filename,d={'most common': 'common'}):
+        with open(filename, 'r') as f:
+            data = json.load(f)
+            questions = data['questions']
+            for question in questions:
+                for key in d:
+                    question['text'] = re.sub(key, d[key], question['text'])
+                data['questions'].append(simp_question)
+        return data
