@@ -1,5 +1,16 @@
+import nltk
 # Dev mode
-dev = True
+
+dev = False
+
+def chomp(x):
+    if x.endswith("\r\n"): return x[:-2]
+    if x.endswith("\n") or x.endswith("\r"): return x[:-1]
+    return x
+
+def filt(x):
+        return x.label()=='JP'
+
 class SimplePPDB(object):
     
     def __init__(self):
@@ -60,6 +71,75 @@ class SimplePPDB(object):
             search_result = prelim_search_result
             
         return search_result
+    
+    
+    
+    def replacement(self, question, replacement=None, pos="JJ"):
+        # Tutorial: https://medium.com/greyatom/learning-pos-tagging-chunking-in-nlp-85f7f811a8cb
+
+        """
+
+        Parameter:
+        Replacement –– dict
+
+
+        """
+        
+        grammar = ('''
+        NP: {<DT>?<JJ>*<NN>}
+        JP: {<JJ><JJ>}
+        ''')
+        token = nltk.word_tokenize(question)
+        tagged = nltk.pos_tag(token)
+        
+        
+        # chunkParser = nltk.RegexpParser(grammar)
+        # tree = chunkParser.parse(tagged)
+        sentence = []
+        if replacement is None:
+            # for subtree in t.subtrees(filter =  filt): # Generate all subtrees
+
+
+            # JJ_word = []
+            # for pos in tagged:
+            #     if pos[1] == "JJ":
+            #         JJ_word.append(pos[0])
+            #     else:
+            #         if len(JJ_word) > 0:
+            
+            # replaced = []
+            for tag in tagged:
+                if tag[1] == pos:
+                    word_replacement = self.search(tag[0], pos)
+                    if len(word_replacement) > 0:
+                        if dev:
+                            print(word_replacement[0])
+                        
+                        word_replacement = chomp(word_replacement[0][4])
+
+                    else:
+                        word_replacement = chomp(tag[0])
+
+
+                    sentence.append(word_replacement)
+                else:
+                    sentence.append(tag[0])
+
+        else:
+            for tag in tagged:
+                if tag[1] == pos and tag[0] in replacement:
+                    
+
+
+                    sentence.append(replacement[tag[0]])
+                else:
+                    sentence.append(tag[0])
+
+
+        return " ".join(sentence)
+            
+
+
 
 
         
