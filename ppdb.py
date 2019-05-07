@@ -36,6 +36,20 @@ class PPDB(object):
             self.ppdb_dict[phrase][paraphrase][count + 1] = split[5] #entailment
         ppdb.close()
 
+
+    '''
+    Returns a dictionary of paraprases and their simplifications.
+    ex: {'most common': 'common', 'excessively specific': 'specific'}
+    '''
+    def get_simplified(self, filename):
+        with open(filename, 'r') as f:
+            simps = {}
+            lines = f.readlines()
+            for line in lines:
+                split = line.split(sep = '\t')
+                simps[split[3]] = split[4][:-1]
+        return simps
+
     def json_swap(self,filename,d={'most common': 'common'}):
         with open(filename, 'r') as f:
             data = json.load(f)
@@ -44,4 +58,14 @@ class PPDB(object):
                 for question in questions:
                     question['text'] = re.sub(key, d[key], question['text'])
                 data['questions'] = questions
+        return data
+
+    def json_appender(self,filename,d={'most common': 'common'}):
+        with open(filename, 'r') as f:
+            data = json.load(f)
+            questions = data['questions']
+            for question in questions:
+                for key in d:
+                    question['text'] = re.sub(key, d[key], question['text'])
+                data['questions'].append(simp_question)
         return data
