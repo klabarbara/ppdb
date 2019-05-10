@@ -89,7 +89,7 @@ class QantaDatabase:
         #     self.dataset = json.load(f)
         para = ppdb.PPDB()
         self.simplifications = para.get_simplified(simple_ngram_path)
-        self.dataset = para.json_swap(dataset_path, d = self.simplifications))
+        self.dataset = para.json_appender(dataset_path, d = self.simplifications)
         self.version = self.dataset['version']
         self.raw_questions = self.dataset['questions']
         self.all_questions = [Question(**q) for q in self.raw_questions]
@@ -227,7 +227,7 @@ def get_trained_guesser_model(questions):
 
 
 ###You don't need to change this funtion
-def generate_ques_data_for_guesses(questions, char_skip = 50):
+def generate_ques_data_for_guesses(questions_in, char_skip = 50):
     '''
     First, we generate the data in the form we need for the guesser to then act on.
     Input:
@@ -243,6 +243,11 @@ def generate_ques_data_for_guesses(questions, char_skip = 50):
         question_lens: Each element is the length of each question in terms of number of snippets the question got
                         divided into via use of char_skip
     '''
+
+    para = ppdb.PPDB()
+    simple_ngram_path = 'simple_1GRAMs' #path to simplified paraphrase list
+    simplifications = para.get_simplified(simple_ngram_path)
+    questions = para.guesser_swap(questions_in, simplifications)
 
     ques_nums = []
     char_indices = []
@@ -726,8 +731,7 @@ if __name__ == "__main__":
 
 
     if args.guesser_saved_flag:
-        guesser_model = Tfidf
-        Guesser().load(args.guesser_model_path)
+        guesser_model = TfidfGuesser().load(args.guesser_model_path)
     else:
         guesser_model = get_trained_guesser_model(train_guess_questions)
         guesser_model.save(args.guesser_model_path)
