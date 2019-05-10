@@ -50,22 +50,49 @@ class PPDB(object):
                 simps[split[3]] = split[4][:-1]
         return simps
 
-    def json_swap(self,filename,d={'most common': 'common'}):
-        with open(filename, 'r') as f:
-            data = json.load(f)
-            questions = data['questions']
+    # def json_swap(self,filename,d={'most common': 'common'}):
+    #     with open(filename, 'r') as f:
+    #         data = json.load(f)
+    #         questions = data['questions']
+    #         for key in d:
+    #             for question in questions:
+    #                 question['text'] = re.sub(key, d[key], question['text'])
+    #             data['questions'] = questions
+    #     return data
+    #
+
+    def guesser_swap(self,questions,d={'most common': 'common'}):
+        new_qs = []
+        for question in questions:
+            qdict = question.to_dict()
             for key in d:
-                for question in questions:
-                    question['text'] = re.sub(key, d[key], question['text'])
-                data['questions'] = questions
-        return data
+                if key in qdict['text']:
+                    key_locs = [k.start() for k in re.finditer(key, qdict['text'])]
+                    qdict['text'] = re.sub(key, d[key], qdict['text'])
+                    qdict['first_sentence'] = re.sub(key, d[key], qdict['first_sentence'])
+            (start,end) = qdict['tokenizations'][0]
+            tok_len = end-start
+            new_toks = []
+            for i in range(start,len(qdict['text']),tok_len+1):
+                if i+tok_len+1 > len(qdict['text']):
+                    new_toks.append([i,len(qdict['text'])])
+                else:
+                    new_toks.append([i,i+tok_len])
+            qdict['tokenizations'] = new_toks
+            new_qs.append(question.from_dict(qdict))
+        return new_qs
 
     def json_appender(self,filename,d={'most common': 'common'}):
         with open(filename, 'r') as f:
             data = json.load(f)
             questions = data['questions']
+            count = 0
             for question in questions:
                 for key in d:
+                    orig_len = len(question['text'])
                     question['text'] = re.sub(key, d[key], question['text'])
-                data['questions'].append(simp_question)
+                if(orig_len != len (question['text'])):
+                    data['questions'].append(question)
+                count+=1
+                print(count)
         return data
