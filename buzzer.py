@@ -11,7 +11,7 @@ from collections import defaultdict
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 import random
-import ppdb
+import SimplePPDB
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -84,12 +84,12 @@ class QantaDatabase:
         split can be {'train', 'dev', 'test'} - gets both the buzzer and guesser folds from the corresponding data file.
         '''
         dataset_path = os.path.join('.', 'qanta.'+split+'.json')
-        simple_ngram_path = 'simple_1GRAMs' #path to simplified paraphrase list
+        simple_ngram_path = '1GRAM_to_1GRAM' #path to simplified paraphrase list
         # with open(dataset_path) as f:
         #     self.dataset = json.load(f)
-        para = ppdb.PPDB()
-        self.simplifications = para.get_simplified(simple_ngram_path)
-        self.dataset = para.json_appender(dataset_path, d = self.simplifications)
+        para = SimplePPDB.SimplePPDB()
+        para.load(simple_ngram_path)
+        self.dataset = para.json_appender(dataset_path)
         self.version = self.dataset['version']
         self.raw_questions = self.dataset['questions']
         self.all_questions = [Question(**q) for q in self.raw_questions]
@@ -244,10 +244,10 @@ def generate_ques_data_for_guesses(questions_in, char_skip = 50):
                         divided into via use of char_skip
     '''
 
-    para = ppdb.PPDB()
-    simple_ngram_path = 'simple_1GRAMs' #path to simplified paraphrase list
-    simplifications = para.get_simplified(simple_ngram_path)
-    questions = para.guesser_swap(questions_in, simplifications)
+    para = SimplePPDB.SimplePPDB()
+    simple_ngram_path = '1GRAM_to_1GRAM' #path to simplified paraphrase list
+    para.load(simple_ngram_path)
+    questions = para.guesser_swap(questions_in)
 
     ques_nums = []
     char_indices = []
