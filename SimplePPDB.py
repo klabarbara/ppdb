@@ -93,7 +93,8 @@ class SimplePPDB(object):
         token = nltk.word_tokenize(question)
         tagged = nltk.pos_tag(token)
         modified = False
-
+        rc  = open("replacement_count", 'w')
+        repcount = 0
         # chunkParser = nltk.RegexpParser(grammar)
         # tree = chunkParser.parse(tagged)
         sentence = []
@@ -111,6 +112,8 @@ class SimplePPDB(object):
             # replaced = []
             for tag in tagged:
                 if tag[1] == pos:
+                    if modified == False:
+                        repcount += 1
                     modified = True
                     word_replacement = self.search(tag[0], pos)
                     if len(word_replacement) > 0:
@@ -136,7 +139,7 @@ class SimplePPDB(object):
                     sentence.append(replacement[tag[0]])
                 else:
                     sentence.append(tag[0])
-
+        rc.write(str(repcount))
         if(modified or not train):
             return " ".join(sentence)
         else:
@@ -169,4 +172,6 @@ class SimplePPDB(object):
             for question in questions:
                 orig_len = len(question['text'])
                 question['text'] = self.replacement(question['text'])
+                if(question['text'] != None):
+                    data['questions'].append(question)
         return data
